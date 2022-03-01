@@ -22,8 +22,10 @@ public class Paralel {
                     public void run() {
                         try {
                             task.run();
+                            System.out.println("Sedang mengunduh file");
                         } finally {
                             latch.countDown();
+                            System.out.println("file selesai diunduh");
                         }
                     }
                 });
