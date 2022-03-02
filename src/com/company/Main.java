@@ -1,5 +1,8 @@
 package com.company;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
+import java.awt.desktop.SystemSleepEvent;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
@@ -14,6 +17,7 @@ import java.util.regex.Pattern;
 public class Main {
     private static String url;
     private static String urn;
+    private static Integer protocol;
     private final Collection<Runnable> tasks = new ArrayList<Runnable>();
     public static void main(String[] args) {
         Paralel tasks = new Paralel();
@@ -38,14 +42,21 @@ public class Main {
 
                 String listLinks = "";
                 parseURL(urlInput);
-
+                String temp = "";
+                SocketFactory socketFactory = SSLSocketFactory.getDefault();
                 Socket socket;
-                socket = new Socket(url, 80);
+
+                if(protocol==1){
+                    socket = socketFactory.createSocket(url, 443);
+                    temp = ("GET " + urn + " HTTP/1.1\r\nHost: " + url + "\r\n\r\n");
+                }else{
+                    socket = new Socket(url, 80);
+                    temp = "GET " + urn + " HTTP/1.1\r\nHost: " + url + "\r\n\r\n";
+                }
+
                 BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
                 BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
 
-
-                String temp = "GET " + urn + " HTTP/1.1\r\nHost: " + url + "\r\n\r\n";
                 bos.write(temp.getBytes(StandardCharsets.UTF_8));
                 bos.flush();
 
@@ -53,6 +64,63 @@ public class Main {
                 byte[] resp = new byte[bufferSize];
                 resp = bis.readAllBytes();
                 String bResp = new String(resp);
+
+                //checkRedirection
+                String stat = bResp.substring(bResp.indexOf("HTTP/1.1")+9, bResp.indexOf("HTTP/1.1")+10);
+                System.out.println("STATUS CODE = "+ stat);
+                String loc1[] = bResp.split("\n");
+                String loc2 = "";
+                for(int i=0; i<loc1.length; i++){
+                    if(loc1[i].startsWith("Location")){
+                        loc2=loc1[i];
+                        loc2=loc2.substring(10);
+                        break;
+                    }
+                }
+                System.out.println("LOCATION = "+ loc2);
+
+                while(stat.equalsIgnoreCase("3"))
+                {
+                    System.out.println("REDIRECTION TO "+loc2);
+                    parseURL(loc2);
+                    System.out.println("protocol = "+protocol);
+                    System.out.println("TEMP B = " + temp);
+                    System.out.println("URI = " + url + "+" + urn);
+                    if(protocol==1){
+                        System.out.println("MAsuk");
+                        socket = socketFactory.createSocket(url, 443);
+                        temp = ("GET " + urn + " HTTP/1.1\r\nHost: " + url + "\r\n\r\n");
+
+                    }else{
+                        System.out.println("MAsuk http");
+                        socket = new Socket(url, 80);
+                        temp = "GET " + urn + " HTTP/1.1\r\nHost: " + url + "\r\n\r\n";
+                    }
+
+                    bis = new BufferedInputStream(socket.getInputStream());
+                    bos = new BufferedOutputStream(socket.getOutputStream());
+
+                    bos.write(temp.getBytes(StandardCharsets.UTF_8));
+                    bos.flush();
+
+//                    int bufferSize = 100;
+//                    byte[] resp = new byte[bufferSize];
+                    resp = bis.readAllBytes();
+                    bResp = new String(resp);
+
+                    stat = bResp.substring(bResp.indexOf("HTTP/1.1")+9, bResp.indexOf("HTTP/1.1")+10);
+                    System.out.println("STATUS CODE = "+ stat);
+                    String loc3[] = bResp.split("\n");
+                    loc2 = "";
+                    for(int i=0; i<loc3.length; i++){
+                        if(loc3[i].startsWith("Location")){
+                            loc2=loc3[i];
+                            loc2=loc2.substring(10);
+                            break;
+                        }
+                    }
+                }
+
                 getHeader(urlInput);
                 boolean isHTML = bResp.contains("Content-Type: text/html");
                 System.out.println(bResp);
@@ -92,6 +160,11 @@ public class Main {
         if(uri.startsWith("http://") || uri.startsWith("https://"))
             uri = uri.substring(uri.indexOf("/") + 2);
 
+        if(uri.startsWith("https://")){
+            protocol = 1;
+        }else{
+            protocol = 0;
+        }
         if (uri.contains("/")) {
             url = uri.substring(0, uri.indexOf("/"));
             urn = uri.substring(url.length());
