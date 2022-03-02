@@ -2,7 +2,6 @@ package com.company;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-import java.awt.desktop.SystemSleepEvent;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
@@ -32,13 +31,13 @@ public class Main {
                 if (urlInput.equalsIgnoreCase("quit"))
                     break;
 
-                if(urlInput.equalsIgnoreCase("download")){
-                    try {
-                        tasks.go();
-                    } catch (Exception e){
-                        System.err.println(e.getMessage());
-                    }
-                }
+//                if(urlInput.equalsIgnoreCase("download")){
+//                    try {
+//                        tasks.go();
+//                    } catch (Exception e){
+//                        System.err.println(e.getMessage());
+//                    }
+//                }
 
                 String listLinks = "";
                 parseURL(urlInput);
@@ -77,7 +76,7 @@ public class Main {
                         break;
                     }
                 }
-                System.out.println("LOCATION = "+ loc2);
+//                System.out.println("LOCATION = "+ loc2);
 
                 while(stat.equalsIgnoreCase("3"))
                 {
@@ -130,12 +129,12 @@ public class Main {
                     fileName = (fileName.substring(0, fileName.indexOf("/")));
                     fileName = reverseString(fileName);
 
-                    File file = new File(urlInput);
-                    System.out.println("absl"+file);
-                    System.out.println("flname"+file.getName());
-                    tasks.add(new DownloadFileTask(urlInput, "./" + "tes"));
-                    System.out.println("File di tangguhkan");
-//                    downloadFile(link, "./" + fileName);
+//                    File file = new File(urlInput);
+//                    System.out.println("absl"+file);
+//                    System.out.println("flname"+file.getName());
+//                    tasks.add(new DownloadFileTask(urlInput, "./" + "tes"));
+//                    System.out.println("File di tangguhkan");
+                    downloadFile(link, "./" + fileName);
 //                    System.out.println("Sedang mengunduh file");
                     continue;
                 }
