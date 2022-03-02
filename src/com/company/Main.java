@@ -121,7 +121,7 @@ public class Main {
                     }
                 }
 
-                getHeader(urlInput);
+//                getHeader(urlInput);
                 boolean isHTML = bResp.contains("Content-Type: text/html");
                 System.out.println(bResp);
                 URL link = new URL(urlInput);
